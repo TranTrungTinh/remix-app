@@ -1,11 +1,28 @@
 import { redirect, type ActionArgs } from "@remix-run/node";
 import { Form } from "@remix-run/react";
+import { PrismaClient } from "@prisma/client";
 
 export async function action({ request }: ActionArgs) {
-  let formData = await request.formData();
-  let json = Object.fromEntries(formData);
+  let db = new PrismaClient();
 
-  console.log(json);
+  let formData = await request.formData();
+  let { date, type, text } = Object.fromEntries(formData);
+
+  if (
+    typeof date !== "string" ||
+    typeof type !== "string" ||
+    typeof text !== "string"
+  ) {
+    throw new Error("Bad request");
+  }
+
+  await db.entry.create({
+    data: {
+      date: new Date(date),
+      type: type,
+      text: text,
+    },
+  });
 
   return redirect("/");
 }
@@ -19,67 +36,60 @@ export default function Index() {
       </p>
 
       <div className="my-8 border p-3">
-        <Form method="post">
-          <p className="italic">Create an entry</p>
+        <p className="italic">Create a new entry</p>
 
+        <Form method="post" className="mt-2">
           <div>
-            <div className="mt-4">
-              <input type="date" name="date" className="text-gray-700" />
+            <div>
+              <input type="date" name="date" id="" className="text-gray-500" />
             </div>
-
-            <div className="mt-2 space-x-6">
-              <label>
-                <input
-                  className="mr-1"
-                  type="radio"
-                  name="category"
-                  value="work"
-                />
+            <div className="mt-4 space-x-4">
+              <label className="inline-block">
+                <input type="radio" className="mr-1" name="type" value="work" />
                 Work
               </label>
-              <label>
+              <label className="inline-block">
                 <input
-                  className="mr-1"
                   type="radio"
-                  name="category"
+                  className="mr-1"
+                  name="type"
                   value="learning"
                 />
                 Learning
               </label>
-              <label>
+              <label className="inline-block">
                 <input
-                  className="mr-1"
                   type="radio"
-                  name="category"
+                  className="mr-1"
+                  name="type"
                   value="interesting-thing"
                 />
                 Interesting thing
               </label>
             </div>
-
-            <div className="mt-2">
-              <textarea
-                name="text"
-                className="w-full text-gray-700"
-                placeholder="Write your entry..."
-              />
-            </div>
-
-            <div className="mt-1 text-right">
-              <button
-                className="bg-blue-500 px-4 py-1 font-medium text-white"
-                type="submit"
-              >
-                Save
-              </button>
-            </div>
+          </div>
+          <div className="mt-4">
+            <textarea
+              placeholder="Type your entry..."
+              name="text"
+              id=""
+              className="w-full text-gray-700"
+            />
+          </div>
+          <div className="mt-2 text-right">
+            <button
+              type="submit"
+              className="bg-blue-500 px-4 py-1 font-semibold text-white"
+            >
+              Save
+            </button>
           </div>
         </Form>
       </div>
 
       <div className="mt-6">
         <p className="font-bold">
-          Week of February 20<sup>th</sup>
+          Week of February 27<sup>th</sup>
         </p>
 
         <div className="mt-3 space-y-4">

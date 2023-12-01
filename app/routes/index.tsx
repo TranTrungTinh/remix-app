@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { type ActionArgs } from "@remix-run/node";
-import { useFetcher } from "@remix-run/react";
-import { format } from "date-fns";
+import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
 
 export async function action({ request }: ActionArgs) {
@@ -29,9 +29,46 @@ export async function action({ request }: ActionArgs) {
   });
 }
 
+export async function loader() {
+  let db = new PrismaClient();
+  let entries = await db.entry.findMany();
+
+  return entries.map((entry) => ({
+    ...entry,
+    date: entry.date.toISOString().substring(0, 10),
+  }));
+}
+
 export default function Index() {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
+  let entries = useLoaderData<typeof loader>();
+
+  let entriesByWeek = entries.reduce<Record<string, typeof entries>>(
+    (memo, entry) => {
+      let sunday = startOfWeek(parseISO(entry.date));
+      let sundayString = format(sunday, "yyyy-MM-dd");
+
+      memo[sundayString] ||= [];
+      memo[sundayString].push(entry);
+
+      return memo;
+    },
+    {}
+  );
+
+  let weeks = Object.keys(entriesByWeek)
+    .sort((a, b) => a.localeCompare(b))
+    .map((dateString) => ({
+      dateString,
+      work: entriesByWeek[dateString].filter((entry) => entry.type === "work"),
+      learnings: entriesByWeek[dateString].filter(
+        (entry) => entry.type === "learning"
+      ),
+      interestingThings: entriesByWeek[dateString].filter(
+        (entry) => entry.type === "interesting-thing"
+      ),
+    }));
 
   useEffect(() => {
     if (fetcher.state === "idle" && textareaRef.current) {
@@ -41,12 +78,7 @@ export default function Index() {
   }, [fetcher.state]);
 
   return (
-    <div className="p-10">
-      <h1 className="text-5xl">Work Journal</h1>
-      <p className="mt-2 text-lg text-gray-400">
-        Learnings and doings. Updated weekly.
-      </p>
-
+    <div>
       <div className="my-8 border p-3">
         <p className="italic">Create a new entry</p>
 
@@ -118,35 +150,66 @@ export default function Index() {
         </fetcher.Form>
       </div>
 
-      <div className="mt-6">
-        <p className="font-bold">
-          Week of February 27<sup>th</sup>
-        </p>
-
-        <div className="mt-3 space-y-4">
-          <div>
-            <p>Work</p>
-            <ul className="ml-8 list-disc">
-              <li>First item</li>
-              <li>Second item</li>
-            </ul>
+      <div className="mt-12 space-y-12">
+        {weeks.map((week) => (
+          <div key={week.dateString}>
+            <p className="font-bold">
+              Week of {format(parseISO(week.dateString), "MMMM do")}
+            </p>
+            <div className="mt-3 space-y-4">
+              {week.work.length > 0 && (
+                <div>
+                  <p>Work</p>
+                  <ul className="ml-8 list-disc">
+                    {week.work.map((entry) => (
+                      <EntryListItem key={entry.id} entry={entry} />
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {week.learnings.length > 0 && (
+                <div>
+                  <p>Learning</p>
+                  <ul className="ml-8 list-disc">
+                    {week.learnings.map((entry) => (
+                      <EntryListItem key={entry.id} entry={entry} />
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {week.interestingThings.length > 0 && (
+                <div>
+                  <p>Interesting things</p>
+                  <ul className="ml-8 list-disc">
+                    {week.interestingThings.map((entry) => (
+                      <EntryListItem key={entry.id} entry={entry} />
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
-          <div>
-            <p>Learnings</p>
-            <ul className="ml-8 list-disc">
-              <li>First item</li>
-              <li>Second item</li>
-            </ul>
-          </div>
-          <div>
-            <p>Interesting things</p>
-            <ul className="ml-8 list-disc">
-              <li>First item</li>
-              <li>Second item</li>
-            </ul>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
+  );
+}
+
+function EntryListItem({
+  entry,
+}: {
+  entry: Awaited<ReturnType<typeof loader>>[number];
+}) {
+  return (
+    <li className="group">
+      {entry.text}
+
+      <Link
+        to={`/entries/${entry.id}/edit`}
+        className="ml-2 text-blue-500 opacity-0 group-hover:opacity-100"
+      >
+        Edit
+      </Link>
+    </li>
   );
 }

@@ -1,68 +1,32 @@
 ## Outline (Building a Work Journal with Remix)
 
-- Logout UI
-
-  - logout button + action in root layout, Form method post.
-
-```tsx
-<Form method="post" className="ml-auto">
-  <button type="submit" className="text-sm text-gray-500 hover:text-gray-200">
-    Logout
-  </button>
-</Form>;
-
-export async function action({ request }: ActionArgs) {
-  let session = await getSession(request.headers.get("cookie"));
-
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await destroySession(session),
-    },
-  });
-}
-```
-
-- then loader in root layout, show logout if admin, otherwise link to login
-
-```tsx
-export async function loader({ request }: LoaderArgs) {
-  let session = await getSession(request.headers.get("cookie"));
-
-  return {
-    session: session.data,
-  };
-}
-```
-
-```tsx
-let { session } = useLoaderData<typeof loader>();
-
-
-{session.isAdmin ? (
-  <Form method="post" className="ml-auto">
-    <button
-      type="submit"
-      className="text-sm text-gray-500 hover:text-gray-200"
-    >
-      Logout
-    </button>
-  </Form>
-) : (
-  <div className="ml-auto">
-    <Link
-      to="/login"
-      className="text-sm text-gray-500 hover:text-gray-200"
-    >
-      Login
-    </Link>
-  </div>
-)}
-``
-
 - Customize UI
 
   - Hide Edit link
+
+```tsx
+<EntryListItem
+  key={entry.id}
+  entry={entry}
+  canEdit={session.isAdmin}
+/>
+```
+  
   - But, can visit /entries/32/edit. Need to hide the route. 401 it after.
+
+```tsx
+if (!entry) {
+  throw new Response("Not found", { status: 404 });
+}
+
+let session = await getSession(request.headers.get("cookie"));
+if (!session.data.isAdmin) {
+  throw new Response("Not authenticated", {
+    status: 401,
+    statusText: "Not authorized",
+  });
+}
+```
 
 - Are we done? UI is "secure". Show that actions need to be secured.
   - Replay curl delete, change URL.

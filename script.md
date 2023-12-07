@@ -1,33 +1,5 @@
 ## Outline (Building a Work Journal with Remix)
 
-- Customize UI
-
-  - Hide Edit link
-
-```tsx
-<EntryListItem
-  key={entry.id}
-  entry={entry}
-  canEdit={session.isAdmin}
-/>
-```
-  
-  - But, can visit /entries/32/edit. Need to hide the route. 401 it after.
-
-```tsx
-if (!entry) {
-  throw new Response("Not found", { status: 404 });
-}
-
-let session = await getSession(request.headers.get("cookie"));
-if (!session.data.isAdmin) {
-  throw new Response("Not authenticated", {
-    status: 401,
-    statusText: "Not authorized",
-  });
-}
-```
-
 - Are we done? UI is "secure". Show that actions need to be secured.
   - Replay curl delete, change URL.
 
@@ -40,13 +12,24 @@ curl 'http://localhost:3000/entries/31/edit?\_data=routes%2Fentries.%24entryId.e
 
 - So, need to secure actions.
 
-  - Return 401 if session.data.isAdmin is not true.
-  - Try to replay it CURL - see "Not authorized". Done!
-  - Also done for edit!
-  - Add it to action on index (CREATE).
-  - Point is to secure action and loader
-  - Summary: We've secured actions from requests from non-authed clients, and we've secured loaders so our users don't encounter flows they don't have access to – better ux. But let's say we forgot to hide the form for guests. We can see if we show it and try to submit, we get an 401. {session.isAdmin} to hide form is about UX – it has nothing to do with security. But the actions make sure our backend data is secure regardless if we have bad UX flows that make it into the app.
-  - Even if you've secured all your actions, errors are still inevitable. We can see them here if we visit a entry edit route by hand (401) or a bogus URL.
+  - In edit action, return 401 if session.data.isAdmin is not true.
+
+```tsx
+let session = await getSession(request.headers.get("cookie"));
+if (!session.data.isAdmin) {
+  throw new Response("Not authorized", { status: 401 });
+}
+```
+
+- Try to replay it CURL - see "Not authorized". Done!
+- Also done for edit!
+
+- Add it to action on index (CREATE).
+
+- So, actions and loaders are secure. Every action and loader is an endpint that's exposed by our server. So the security happens here. What we did in last video is more about UX – but had nothing to do with security. Always want to secure actions (unauthorized mutations coming in) and loaders (sensitive data going out), so our data is secure. Also helps if a bad UX flow makes it into our app.
+
+- Summary: We've secured actions from requests from non-authed clients, and we've secured loaders so our users don't encounter flows they don't have access to – better ux. But let's say we forgot to hide the form for guests. We can see if we show it and try to submit, we get an 401. {session.isAdmin} to hide form is about UX – it has nothing to do with security. But the actions make sure our backend data is secure regardless if we have bad UX flows that make it into the app.
+- Even if you've secured all your actions, errors are still inevitable. We can see them here if we visit a entry edit route by hand (401) or a bogus URL.
 
 - Error boundary & UI
 
@@ -68,4 +51,7 @@ curl 'http://localhost:3000/entries/31/edit?\_data=routes%2Fentries.%24entryId.e
 
 - Upgrade to v2
   - Remix philosophy. Upgrade to last of current version, enable all flags, run tests (lol), then upgrade majors.
+
+```
+
 ```

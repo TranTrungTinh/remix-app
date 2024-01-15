@@ -1,24 +1,31 @@
+# 🔐 Next Protect
+
+A solid template to build Next.js apps with email & password auth, a PostgreSQL database, and protected content, using Next-Auth and Prisma
+
 #### ⚡️ Requirements
 
-- Install Node.js as [nodejs.org](https://nodejs.org)
+- Install Node.js at [nodejs.org](https://nodejs.org)
 - Good code editor, preferably [VSCode](https://code.visualstudio.com)
-- Github account at [github.com](https://github.com)
+
+#### 🔧 Recommended VSCode Extensions
+
+- [Prisma Syntax Highlighter](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+- [TailwindCSS Intellisense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
+- [Material Theme (the VSCode theme I use)](https://marketplace.visualstudio.com/items?itemName=Equinusocio.vsc-material-theme)
 
 #### 📚 Libraries/Services Used
 
 - [Nextjs 14](https://nextjs.org)
-- [Railway (Postgres database)](https://railway.app/new)
-- [Github (to create OAuth app)](https://github.com/settings/applications/new)
 - [Prisma (ORM)](https://prisma.io)
-- [Tremor (charts/graphs)](https://tremor.so)
-- [TailwindCSS (styles)](https://tailwindcss.com)
-- [Avvvatars (fallback avatar)](https://avvvatars.com/)
-- [Next Auth (user auth)](https://authjs.dev)
+- [Next Auth (authentication)](https://authjs.dev)
+- [Railway (Postgres db)](https://railway.app/new)
+- [ShadCN UI (user interface)](https://ui.shadcn.com)
+- [Lucide (icon library)](https://lucide.dev)
+- [TailwindCSS (css library)](https://tailwindcss.com)
 
 #### 🧠 Learn More
 
-- [Next Auth and Prisma Adapter Setup](https://authjs.dev/reference/adapter/prisma#prismaadapter)
-- [Protecting Routes with Next Auth](https://authjs.dev/guides/basics/securing-pages-and-api-routes#nextjs-middleware)
-- [getServerSession in Next Auth](https://next-auth.js.org/configuration/nextjs#getServerSession)
+- [Connecting Next-Auth and Prisma](https://authjs.dev/reference/adapter/prisma)
+- [Next-Auth and Prisma Schema](https://authjs.dev/reference/adapter/prisma#create-the-prisma-schema-from-scratch)
 
-Inspired by: https://github.com/vercel/nextjs-postgres-nextauth-tailwindcss-template
+Inspired by: https://github.com/vercel/nextjs-postgres-auth-starter

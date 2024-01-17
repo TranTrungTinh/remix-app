@@ -1,3 +1,4 @@
+import SharedLayout from "@/components/SharedLayout";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -15,7 +16,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>{children}</body>
+      <body
+        className={`${inter.className} flex h-full bg-purple-900 dark:bg-black`}
+      >
+        <SharedLayout>{children}</SharedLayout>
+      </body>
     </html>
   );
 }

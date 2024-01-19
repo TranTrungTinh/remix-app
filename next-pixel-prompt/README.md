@@ -1,6 +1,6 @@
 #### What You Need
 
-1. [Node.js](https://nodejs.org) installed on your computer
+1. [Node.js](https://nodejs.org) installed on your computer (18)
 2. A good code editor, preferably [VSCode](https://code.visualstudio.com)
 3. A free Replicate account at [Replicate.com](https://replicate.com)
 
